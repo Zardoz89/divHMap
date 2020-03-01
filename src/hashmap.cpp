@@ -7,6 +7,11 @@
 #include <stdio.h>
 #include <string.h>
 
+// Agregado para usar div_malloc
+
+#define GLOBALS
+#include "div.h"
+
 #define INITIAL_SIZE (256)
 #define MAX_CHAIN_LENGTH (8)
 
@@ -29,10 +34,11 @@ typedef struct _hashmap_map{
  * Return an empty hashmap, or NULL on failure.
  */
 map_t hashmap_new() {
-	hashmap_map* m = (hashmap_map*) malloc(sizeof(hashmap_map));
+	hashmap_map* m = (hashmap_map*) div_malloc(sizeof(hashmap_map)/sizeof(int));
 	if(!m) goto err;
 
-	m->data = (hashmap_element*) calloc(INITIAL_SIZE, sizeof(hashmap_element));
+	//m->data = (hashmap_element*) calloc(INITIAL_SIZE, sizeof(hashmap_element));
+	m->data = (hashmap_element*) div_malloc(INITIAL_SIZE * sizeof(hashmap_map)/sizeof(int));
 	if(!m->data) goto err;
 
 	m->table_size = INITIAL_SIZE;
@@ -226,7 +232,8 @@ int hashmap_rehash(map_t in){
 	/* Setup the new elements */
 	hashmap_map *m = (hashmap_map *) in;
 	hashmap_element* temp = (hashmap_element *)
-		calloc(2 * m->table_size, sizeof(hashmap_element));
+	//	calloc(2 * m->table_size, sizeof(hashmap_element));
+		div_malloc(2 * m->table_size * sizeof(hashmap_element)/sizeof(int));
 	if(!temp) return MAP_OMEM;
 
 	/* Update the array */
@@ -250,7 +257,7 @@ int hashmap_rehash(map_t in){
 			return status;
 	}
 
-	free(curr);
+	div_free(curr);
 
 	return MAP_OK;
 }
@@ -432,8 +439,8 @@ int hashmap_remove(map_t in, char* key){
 /* Deallocate the hashmap */
 void hashmap_free(map_t in){
 	hashmap_map* m = (hashmap_map*) in;
-	free(m->data);
-	free(m);
+	div_free(m->data);
+	div_free(m);
 }
 
 /* Return the length of the hashmap */
